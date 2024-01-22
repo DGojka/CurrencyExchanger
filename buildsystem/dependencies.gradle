@@ -1,0 +1,58 @@
+ext {
+    ktxVersion = "1.8.0"
+    materialVersion = "1.6.1"
+    constraintLayoutVersion = "2.1.4"
+    navigationVersion = "2.5.3"
+    activityVersion = "1.6.1"
+
+    coreLibraries = [
+            "androidx.activity:activity-ktx:$activityVersion",
+            "androidx.core:core-ktx:$ktxVersion",
+            "com.google.android.material:material:$materialVersion",
+            "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion",
+            "androidx.navigation:navigation-fragment-ktx:$navigationVersion",
+            "androidx.navigation:navigation-ui-ktx:$navigationVersion"
+    ]
+
+    junitVersion = "4.13.2"
+    test = [
+            "junit:junit:$junitVersion"
+    ]
+
+    espresso = "3.4.0"
+    andoidJunitVersion = "1.1.3"
+
+    androidTest = [
+            "androidx.test.ext:junit:$andoidJunitVersion",
+            "androidx.test.espresso:espresso-core:$espresso"
+    ]
+
+    coroutinesVersion = "1.6.4"
+    coroutines = [
+            "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    ]
+    coroutinesRunTimeVersion = "2.5.1"
+    coroutinesRunTime = [
+            "androidx.lifecycle:lifecycle-viewmodel-ktx:$coroutinesRunTimeVersion",
+            "androidx.lifecycle:lifecycle-runtime-ktx:$coroutinesRunTimeVersion",
+            "androidx.lifecycle:lifecycle-livedata-ktx:$coroutinesRunTimeVersion"
+
+    ]
+
+    daggerVersion = "2.44"
+    dagger = [
+            "com.google.dagger:dagger:$daggerVersion",
+            "com.google.dagger:dagger-android-support:$daggerVersion"
+    ]
+    daggerAnnotationProcessor = [
+            "com.google.dagger:dagger-android-processor:$daggerVersion",
+            "com.google.dagger:dagger-compiler:$daggerVersion"
+    ]
+
+    retrofitVersion = "2.9.0"
+    retrofit = [
+            "com.squareup.retrofit2:retrofit:$retrofitVersion",
+            "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    ]
+}
