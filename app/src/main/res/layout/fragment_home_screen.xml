@@ -10,7 +10,7 @@
         android:id="@+id/balances_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MY BALANCES"
+        android:text="@string/my_balances"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="BALANCES PLACEHOLDER "
+        android:text="@string/balances_placeholder"
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="@id/balances_label"
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="CURRENCY EXCHANGE"
+        android:text="@string/currency_exchange"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/balances_placeholder" />
 
@@ -40,15 +40,17 @@
         android:layout_height="wrap_content"
         android:padding="0dp"
         android:src="@drawable/arrow"
-        app:tint="#FF0000"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/currency_exchange_label" />
+        app:layout_constraintTop_toBottomOf="@id/currency_exchange_label"
+        app:tint="#FF0000"
+        android:importantForAccessibility="no"
+        />
 
     <TextView
         android:id="@+id/sell_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sell"
+        android:text="@string/sell"
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@id/sell_image"
@@ -72,15 +74,17 @@
         android:padding="0dp"
         android:rotation="180"
         android:src="@drawable/arrow"
-        app:tint="@color/green"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sell_image" />
+        app:layout_constraintTop_toBottomOf="@id/sell_image"
+        app:tint="@color/green"
+        android:importantForAccessibility="no"
+        />
 
     <TextView
         android:id="@+id/receive_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Receive"
+        android:text="@string/receive"
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@id/receive_image"
@@ -89,59 +93,54 @@
 
     <TextView
         android:id="@+id/currency_sell_placeholder"
-        android:layout_marginEnd="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/sell_label"
+        android:layout_marginEnd="12dp"
+        android:text="@string/eur"
         app:layout_constraintBottom_toBottomOf="@id/sell_label"
-        android:text="EUR"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/sell_label" />
 
     <TextView
         android:id="@+id/currency_receive_placeholder"
-        android:layout_marginEnd="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/receive_label"
+        android:layout_marginEnd="12dp"
+        android:text="@string/usd"
         app:layout_constraintBottom_toBottomOf="@id/receive_label"
-        android:text="USD"
-        />
-    
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/receive_label" />
+
     <TextView
         android:id="@+id/sell_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@id/sell_label"
         app:layout_constraintEnd_toStartOf="@id/currency_sell_placeholder"
         app:layout_constraintTop_toTopOf="@id/sell_label"
-        app:layout_constraintBottom_toBottomOf="@id/sell_label"
-        android:layout_marginEnd="12dp"
-        tools:text="100.00"
-        android:textColor="@color/black"
-        />
+        tools:text="100.00" />
 
     <TextView
         android:id="@+id/receive_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:textColor="@color/green"
+        app:layout_constraintBottom_toBottomOf="@id/receive_label"
         app:layout_constraintEnd_toStartOf="@id/currency_receive_placeholder"
         app:layout_constraintTop_toTopOf="@id/receive_label"
-        app:layout_constraintBottom_toBottomOf="@id/receive_label"
-        android:layout_marginEnd="12dp"
-        tools:text="+110.30"
-        android:textColor="@color/green"
-        />
+        tools:text="+110.30" />
 
     <com.google.android.material.button.MaterialButton
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:layout_marginHorizontal="12dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:cornerRadius="12dp"
-        android:text="submit"
         android:backgroundTint="@color/teal_200"
-        />
+        android:text="@string/submit"
+        app:cornerRadius="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
