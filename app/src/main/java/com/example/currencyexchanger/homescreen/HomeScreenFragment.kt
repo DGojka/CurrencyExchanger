@@ -1,8 +1,6 @@
 package com.example.currencyexchanger.homescreen
 
 import android.content.Context
-import android.os.Bundle
-import android.view.View
 import androidx.fragment.app.Fragment
 import com.example.currencyexchanger.R
 import com.example.currencyexchanger.app.di.AppComponent.Companion.appComponent
@@ -24,10 +22,4 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
         super.onAttach(context)
         appComponent.inject(this)
     }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-    }
-
 }
