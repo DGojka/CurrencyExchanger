@@ -40,6 +40,7 @@ dependencies {
     implementation coreLibraries
     implementation coroutines
     implementation dagger
+    implementation retrofit
 
     kapt daggerAnnotationProcessor
     runtimeOnly coroutinesRunTime
