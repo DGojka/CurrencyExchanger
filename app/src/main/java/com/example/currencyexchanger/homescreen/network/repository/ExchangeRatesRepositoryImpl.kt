@@ -1,7 +1,10 @@
-package com.example.currencyexchanger.homescreen.network
+package com.example.currencyexchanger.homescreen.network.repository
 
 import android.accounts.NetworkErrorException
 import com.example.currencyexchanger.extensions.inFlow
+import com.example.currencyexchanger.homescreen.network.ExchangeRatesClient
+import com.example.currencyexchanger.homescreen.network.data.ExchangeRates
+import com.example.currencyexchanger.homescreen.network.mappers.ExchangeRatesMapper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 

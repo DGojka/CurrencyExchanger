@@ -1,6 +1,10 @@
 package com.example.currencyexchanger.app.di
 
 import com.example.currencyexchanger.homescreen.network.*
+import com.example.currencyexchanger.homescreen.network.mappers.ExchangeRatesMapper
+import com.example.currencyexchanger.homescreen.network.mappers.ExchangeRatesMapperImpl
+import com.example.currencyexchanger.homescreen.network.repository.ExchangeRatesRepository
+import com.example.currencyexchanger.homescreen.network.repository.ExchangeRatesRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

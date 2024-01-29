@@ -1,4 +1,4 @@
-package com.example.currencyexchanger.homescreen.network
+package com.example.currencyexchanger.homescreen.network.data
 
 data class ExchangeRatesJson(
     val base: String,
