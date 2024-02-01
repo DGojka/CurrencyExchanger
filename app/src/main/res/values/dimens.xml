@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="standard_25">4dp</dimen>
+    <dimen name="standard_50">8dp</dimen>
+    <dimen name="standard_75">12dp</dimen>
+    <dimen name="standard_100">16dp</dimen>
+    <dimen name="standard_125">20dp</dimen>
+    <dimen name="standard_150">24dp</dimen>
+
+    <dimen name="submit_button_size">56dp</dimen>
+
+    <dimen name="standard_text_size">16sp</dimen>
+
+</resources>
