@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="@dimen/standard_100">
 
     <TextView
         android:id="@+id/balances_label"
@@ -14,14 +14,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/balances_placeholder"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/balances"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/balances_placeholder"
-        android:textColor="@color/black"
-        android:textSize="16sp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/standard_75"
         app:layout_constraintStart_toStartOf="@id/balances_label"
         app:layout_constraintTop_toBottomOf="@id/balances_label" />
 
@@ -29,22 +26,21 @@
         android:id="@+id/currency_exchange_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="@dimen/standard_150"
         android:text="@string/currency_exchange"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/balances_placeholder" />
+        app:layout_constraintTop_toBottomOf="@id/balances" />
 
     <ImageView
         android:id="@+id/sell_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
         android:padding="0dp"
         android:src="@drawable/arrow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/currency_exchange_label"
-        app:tint="#FF0000"
-        android:importantForAccessibility="no"
-        />
+        app:tint="#FF0000" />
 
     <TextView
         android:id="@+id/sell_label"
@@ -52,12 +48,13 @@
         android:layout_height="wrap_content"
         android:text="@string/sell"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="@dimen/standard_text_size"
         app:layout_constraintBottom_toBottomOf="@id/sell_image"
         app:layout_constraintStart_toEndOf="@id/sell_image"
         app:layout_constraintTop_toTopOf="@id/sell_image" />
 
     <View
+        android:id="@+id/separator"
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:background="@color/gray"
@@ -70,15 +67,14 @@
         android:id="@+id/receive_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="@dimen/standard_75"
+        android:importantForAccessibility="no"
         android:padding="0dp"
         android:rotation="180"
         android:src="@drawable/arrow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/sell_image"
-        app:tint="@color/green"
-        android:importantForAccessibility="no"
-        />
+        app:tint="@color/green" />
 
     <TextView
         android:id="@+id/receive_label"
@@ -86,60 +82,63 @@
         android:layout_height="wrap_content"
         android:text="@string/receive"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="@dimen/standard_text_size"
         app:layout_constraintBottom_toBottomOf="@id/receive_image"
         app:layout_constraintStart_toEndOf="@id/receive_image"
         app:layout_constraintTop_toTopOf="@id/receive_image" />
 
-    <TextView
-        android:id="@+id/currency_sell_placeholder"
+    <Spinner
+        android:id="@+id/sellCurrencySpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:text="@string/eur"
         app:layout_constraintBottom_toBottomOf="@id/sell_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/sell_label" />
 
-    <TextView
-        android:id="@+id/currency_receive_placeholder"
+    <Spinner
+        android:id="@+id/receiveCurrencySpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:text="@string/usd"
-        app:layout_constraintBottom_toBottomOf="@id/receive_label"
+        app:layout_constraintBottom_toBottomOf="@id/receive_image"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/receive_label" />
+        app:layout_constraintTop_toTopOf="@id/receive_image" />
 
-    <TextView
+    <EditText
         android:id="@+id/sell_amount"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
+        android:focusedByDefault="true"
+        android:gravity="end"
+        android:inputType="number"
+        android:maxLength="10"
         android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="@id/sell_label"
-        app:layout_constraintEnd_toStartOf="@id/currency_sell_placeholder"
+        app:layout_constraintEnd_toStartOf="@id/sellCurrencySpinner"
+        app:layout_constraintStart_toEndOf="@id/sell_label"
         app:layout_constraintTop_toTopOf="@id/sell_label"
         tools:text="100.00" />
 
     <TextView
         android:id="@+id/receive_amount"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
+        android:layout_marginEnd="@dimen/standard_75"
+        android:gravity="end"
         android:textColor="@color/green"
         app:layout_constraintBottom_toBottomOf="@id/receive_label"
-        app:layout_constraintEnd_toStartOf="@id/currency_receive_placeholder"
+        app:layout_constraintEnd_toStartOf="@id/receiveCurrencySpinner"
+        app:layout_constraintStart_toEndOf="@id/receive_label"
         app:layout_constraintTop_toTopOf="@id/receive_label"
         tools:text="+110.30" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/submit_button"
         android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_marginHorizontal="12dp"
+        android:layout_height="@dimen/submit_button_size"
+        android:layout_marginHorizontal="@dimen/standard_75"
         android:backgroundTint="@color/teal_200"
         android:text="@string/submit"
-        app:cornerRadius="12dp"
+        app:cornerRadius="@dimen/standard_75"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
