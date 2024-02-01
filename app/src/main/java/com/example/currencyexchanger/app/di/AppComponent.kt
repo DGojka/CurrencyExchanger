@@ -8,10 +8,12 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [NetworkModule::class, DataModule::class, HomeScreenModule::class])
+@Component(modules = [NetworkModule::class, DataModule::class, HomeScreenModule::class, AppModule::class])
 interface AppComponent {
 
     fun inject(homeScreenFragment: HomeScreenFragment)
+
+    fun inject(app : CurrencyExchangerApp)
 
     companion object {
         val Activity.appComponent: AppComponent

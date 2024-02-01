@@ -1,6 +1,8 @@
 package com.example.currencyexchanger.app.di
 
-import com.example.currencyexchanger.homescreen.network.*
+import android.content.Context
+import com.example.currencyexchanger.homescreen.managers.HoldingsManager
+import com.example.currencyexchanger.homescreen.network.ExchangeRatesClient
 import com.example.currencyexchanger.homescreen.network.mappers.ExchangeRatesMapper
 import com.example.currencyexchanger.homescreen.network.mappers.ExchangeRatesMapperImpl
 import com.example.currencyexchanger.homescreen.network.repository.ExchangeRatesRepository
@@ -23,4 +25,11 @@ class DataModule {
         client: ExchangeRatesClient
     ): ExchangeRatesRepository =
         ExchangeRatesRepositoryImpl(exchangeRatesMapper, client)
+
+    @Singleton
+    @Provides
+    fun provideHoldingsManager(context: Context): HoldingsManager {
+        return HoldingsManager(context)
+    }
+
 }
