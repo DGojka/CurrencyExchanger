@@ -41,7 +41,10 @@ class HomeScreenViewModel(
 
     fun notifyExchangeDataChanged(value: Double) {
         _uiState.value =
-            _uiState.value.copy(exchangeDetails = calculateExchange(value).holdingToReceive.amount)
+            _uiState.value.copy(
+                exchangeDetails = calculateExchange(value).holdingToReceive.amount,
+                exchangeResult = null
+            )
     }
 
     fun submitExchange(amount: Double?) {
@@ -63,10 +66,17 @@ class HomeScreenViewModel(
 
     fun setCurrencyToReceive(selectedCurrency: String) {
         if (::currencyToReceive.isInitialized) {
-            val currenciesToBuy =
-                holdingsManager.getHoldings().keys.minus(selectedCurrency)
-            _uiState.value = _uiState.value.copy(currenciesHeld = currenciesToBuy.toList())
+            val currenciesToSell =
+                holdingsManager.getHoldings().keys.minus(selectedCurrency).toList()
+            _uiState.value = _uiState.value.copy(
+                currenciesHeld = currenciesToSell,
+                exchangeResult = null
+            )
+            if (currencyToSell == selectedCurrency) {
+                currencyToSell = currenciesToSell[0]
+            }
         }
+
         currencyToReceive = selectedCurrency
     }
 
@@ -78,10 +88,12 @@ class HomeScreenViewModel(
             fee = calculateFee(value)
         }
         val amountWithFee = value - fee
-
         val exchangedAmount = when {
             isCurrencyToSellBaseCurrency() -> amountWithFee * exchangeRate
-            isCurrencyToReceiveBaseCurrency() -> amountWithFee / exchangeRate
+            isCurrencyToReceiveBaseCurrency() -> {
+                val rate = exchangeRates.rates[currencyToSell]!!
+                amountWithFee / rate
+            }
             else -> convertToBaseCurrency(amountWithFee) * exchangeRate
         }
 
@@ -115,7 +127,8 @@ class HomeScreenViewModel(
         _uiState.value =
             _uiState.value.copy(
                 currenciesHeld = holdings.keys.toList(),
-                holdingsRvItem = holdingsRvMapper.mapToHoldingsRv(holdings)
+                holdingsRvItem = holdingsRvMapper.mapToHoldingsRv(holdings),
+                exchangeResult = null
             )
     }
 
