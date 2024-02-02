@@ -11,9 +11,9 @@ class AppPreferences(context: Context) {
         return preferences.getBoolean(FIRST_TIME_APP_USED_KEY, true)
     }
 
-    fun setFirstTime(value: Boolean) {
+    fun setFirstTime() {
         val editor: SharedPreferences.Editor = preferences.edit()
-        editor.putBoolean(FIRST_TIME_APP_USED_KEY, value)
+        editor.putBoolean(FIRST_TIME_APP_USED_KEY, false)
         editor.apply()
     }
 

@@ -3,6 +3,7 @@ package com.example.currencyexchanger.app.di
 import com.example.currencyexchanger.homescreen.HomeScreenViewModel
 import com.example.currencyexchanger.homescreen.list.HoldingsRvMapper
 import com.example.currencyexchanger.homescreen.list.HoldingsRvMapperImpl
+import com.example.currencyexchanger.homescreen.managers.AppPreferences
 import com.example.currencyexchanger.homescreen.managers.HoldingsManager
 import com.example.currencyexchanger.homescreen.network.ExchangeRatesClient
 import com.example.currencyexchanger.homescreen.network.repository.ExchangeRatesRepository
@@ -17,9 +18,15 @@ class HomeScreenModule {
     fun provideHomeScreenViewModel(
         exchangeRatesRepository: ExchangeRatesRepository,
         holdingsManager: HoldingsManager,
-        holdingsRvMapper: HoldingsRvMapper
+        holdingsRvMapper: HoldingsRvMapper,
+        appPreferences: AppPreferences
     ) =
-        HomeScreenViewModel(exchangeRatesRepository, holdingsManager, holdingsRvMapper)
+        HomeScreenViewModel(
+            exchangeRatesRepository,
+            holdingsManager,
+            holdingsRvMapper,
+            appPreferences
+        )
 
     @Provides
     fun provideCurrencyExchangeClient(retrofit: Retrofit): ExchangeRatesClient =

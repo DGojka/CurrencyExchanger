@@ -7,6 +7,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -58,17 +59,39 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
     private fun bindState(state: HomeScreenUiState) {
         holdingsAdapter.submitList(state.holdingsRvItem)
         binding.receiveAmount.text =
-            "+${state.exchangedCurrencyValue.formatTo2Decimals()}"
-        updateAvailableCurrencies(state.availableCurrenciesToBuy)
+            "+${state.exchangeDetails.formatTo2Decimals()}"
+        updateAvailableCurrencies(state.availableCurrenciesToReceive)
         updateAvailableCurrenciesToSell(state.currenciesHeld)
         binding.submitButton.setOnClickListener {
             viewModel.submitExchange(binding.sellAmount.text.toString().toDoubleOrNull())
+        }
+        when (val result = state.exchangeResult) {
+            is ExchangeResult.Success -> {
+                with(result.exchangeDetails) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Sold ${holdingToSell.amount.formatTo2Decimals()} ${holdingToSell.currency} and received ${holdingToReceive.amount.formatTo2Decimals()} ${holdingToReceive.currency}, fee: ${fee.formatTo2Decimals()}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+            ExchangeResult.InsufficientBalanceError -> Toast.makeText(
+                requireContext(),
+                "Insufficient balance",
+                Toast.LENGTH_SHORT
+            ).show()
+            ExchangeResult.UnknownNetworkError -> Toast.makeText(
+                requireContext(),
+                "Network error",
+                Toast.LENGTH_SHORT
+            ).show()
+            null -> {}
         }
     }
 
     private fun setupSellAmountTextChangeListener() {
         binding.sellAmount.addTextChangedListener(getOnTextChangeListener {
-            viewModel.calculateExchange(it.toDouble())
+            viewModel.notifyExchangeDataChanged(it.toDouble())
         })
     }
 
@@ -85,7 +108,9 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
                 viewModel.setCurrencyToSell(it)
                 val currentAmount = binding.sellAmount.text.toString()
                 if (currentAmount.isNotBlank()) {
-                    viewModel.calculateExchange(binding.sellAmount.text.toString().toDouble())
+                    viewModel.notifyExchangeDataChanged(
+                        binding.sellAmount.text.toString().toDouble()
+                    )
                 }
             }
         binding.receiveCurrencySpinner.onItemSelectedListener =
@@ -93,7 +118,7 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
                 viewModel.setCurrencyToReceive(it)
                 val currentAmount = binding.sellAmount.text.toString()
                 if (currentAmount.isNotBlank()) {
-                    viewModel.calculateExchange(currentAmount.toDouble())
+                    viewModel.notifyExchangeDataChanged(currentAmount.toDouble())
                 }
             }
     }

@@ -23,16 +23,15 @@ class CurrencyExchangerApp : Application() {
             .appModule(AppModule(this))
             .build()
         appComponent.inject(this)
-        setupFirstAppLaunch()
         if (appPreferences.isFirstTime()) {
             setupFirstAppLaunch()
         }
     }
 
     private fun setupFirstAppLaunch() {
-        appPreferences.setFirstTime(false)
+        appPreferences.setFirstTime()
         appPreferences.setFreeExchangesAmount(FREE_EXCHANGES_AMOUNT)
-        holdingsManager.saveHolding(BASE_HOLDING, STARTING_BALANCE)
+        holdingsManager.receiveHolding(BASE_HOLDING, STARTING_BALANCE)
     }
 
     companion object {
