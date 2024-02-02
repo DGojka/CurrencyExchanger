@@ -41,6 +41,7 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
         setupHoldingsRv()
         setupSellAmountTextChangeListener()
         setupCurrencyPickers()
+        setupSubmitButton()
         observeState()
     }
 
@@ -58,16 +59,13 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
             "+${state.exchangeDetails.formatTo2Decimals()}"
         updateAvailableCurrencies(state.availableCurrenciesToReceive)
         updateAvailableCurrenciesToSell(state.currenciesHeld)
-        binding.submitButton.setOnClickListener {
-            viewModel.submitExchange(
-                binding.sellAmountEditText.text.toString().toDoubleOrNull(),
-                currencyToReceive = binding.receiveCurrencySpinner.selectedItem.toString(),
-                currencyToSell = binding.sellCurrencySpinner.selectedItem.toString()
-            )
-        }
-        when (val result = state.exchangeResult) {
+        handleExchangeResult(state.exchangeResult)
+    }
+
+    private fun handleExchangeResult(exchangeResult: ExchangeResult?) {
+        when (exchangeResult) {
             is ExchangeResult.Success -> {
-                with(result.exchangeDetails) {
+                with(exchangeResult.exchangeDetails) {
                     requireContext().showLongToast(
                         getString(
                             R.string.exchange_success_toast,
@@ -87,6 +85,16 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
         }
     }
 
+    private fun setupSubmitButton() {
+        binding.submitButton.setOnClickListener {
+            viewModel.submitExchange(
+                binding.sellAmountEditText.text.toString().toDoubleOrNull(),
+                currencyToReceive = binding.receiveCurrencySpinner.selectedItem.toString(),
+                currencyToSell = binding.sellCurrencySpinner.selectedItem.toString()
+            )
+        }
+    }
+
     private fun setupSellAmountTextChangeListener() {
         binding.sellAmountEditText.addTextChangedListener(getOnTextChangeListener {
             viewModel.calculateExchange(
@@ -103,30 +111,33 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
 
         sellCurrencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         receiveCurrencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.sellCurrencySpinner.adapter = sellCurrencyAdapter
-        binding.receiveCurrencySpinner.adapter = receiveCurrencyAdapter
-        binding.sellCurrencySpinner.onItemSelectedListener =
-            getOnItemSelectedListener {
-                val currentAmount = binding.sellAmountEditText.text.toString()
-                if (currentAmount.isNotBlank()) {
-                    viewModel.calculateExchange(
-                        currentAmount.toDouble(),
-                        currencyToReceive = binding.receiveCurrencySpinner.selectedItem.toString(),
-                        it
-                    )
+
+        with(binding) {
+            sellCurrencySpinner.adapter = sellCurrencyAdapter
+            receiveCurrencySpinner.adapter = receiveCurrencyAdapter
+            sellCurrencySpinner.onItemSelectedListener =
+                getOnItemSelectedListener {
+                    val currentAmount = sellAmountEditText.text.toString()
+                    if (currentAmount.isNotBlank()) {
+                        viewModel.calculateExchange(
+                            currentAmount.toDouble(),
+                            currencyToReceive = receiveCurrencySpinner.selectedItem.toString(),
+                            it
+                        )
+                    }
                 }
-            }
-        binding.receiveCurrencySpinner.onItemSelectedListener =
-            getOnItemSelectedListener {
-                val currentAmount = binding.sellAmountEditText.text.toString()
-                if (currentAmount.isNotBlank()) {
-                    viewModel.calculateExchange(
-                        currentAmount.toDouble(),
-                        currencyToReceive = it,
-                        currencyToSell = binding.sellCurrencySpinner.selectedItem.toString()
-                    )
+            receiveCurrencySpinner.onItemSelectedListener =
+                getOnItemSelectedListener {
+                    val currentAmount = sellAmountEditText.text.toString()
+                    if (currentAmount.isNotBlank()) {
+                        viewModel.calculateExchange(
+                            currentAmount.toDouble(),
+                            currencyToReceive = it,
+                            currencyToSell = sellCurrencySpinner.selectedItem.toString()
+                        )
+                    }
                 }
-            }
+        }
     }
 
     private fun getOnTextChangeListener(onTextChange: (text: String) -> Unit) =
