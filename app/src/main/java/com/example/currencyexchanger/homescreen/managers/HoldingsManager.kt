@@ -10,10 +10,23 @@ class HoldingsManager(context: Context) {
         context.getSharedPreferences(HOLDINGS_PREFS, Context.MODE_PRIVATE)
     private val gson = Gson()
 
-
-    fun saveHolding(currency: String, newValue: Double) {
+    fun sellHolding(currency: String, newValue: Double) {
         val holdings = getHoldings().toMutableMap()
-        holdings[currency] = newValue
+        holdings[currency] = holdings[currency]!! - newValue
+        if (holdings[currency] == 0.0) {
+            holdings.remove(currency)
+        }
+        saveHoldings(holdings)
+    }
+
+    fun receiveHolding(currency: String, newValue: Double) {
+        val holdings = getHoldings().toMutableMap()
+        val currentValue = holdings[currency]
+        if (currentValue != null) {
+            holdings[currency] = currentValue + newValue
+        } else {
+            holdings[currency] = newValue
+        }
         saveHoldings(holdings)
     }
 

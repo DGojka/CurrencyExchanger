@@ -2,7 +2,11 @@ package com.example.currencyexchanger.homescreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.currencyexchanger.extensions.isNullOrZero
+import com.example.currencyexchanger.homescreen.data.Balance
+import com.example.currencyexchanger.homescreen.data.ExchangeDetails
 import com.example.currencyexchanger.homescreen.list.HoldingsRvMapper
+import com.example.currencyexchanger.homescreen.managers.AppPreferences
 import com.example.currencyexchanger.homescreen.managers.HoldingsManager
 import com.example.currencyexchanger.homescreen.network.data.ExchangeRates
 import com.example.currencyexchanger.homescreen.network.repository.ExchangeRatesRepository
@@ -14,7 +18,8 @@ import kotlinx.coroutines.launch
 class HomeScreenViewModel(
     private val repository: ExchangeRatesRepository,
     private val holdingsManager: HoldingsManager,
-    private val holdingsRvMapper: HoldingsRvMapper
+    private val holdingsRvMapper: HoldingsRvMapper,
+    private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val _uiState =
@@ -22,48 +27,76 @@ class HomeScreenViewModel(
     val uiState: StateFlow<HomeScreenUiState> = _uiState
 
     private val timer: CountDownTimer = CountDownTimer()
+    private var firstExchangeRateFetched = false
+
     private lateinit var exchangeRates: ExchangeRates
 
-    private lateinit var currencyToSell: String
-    private lateinit var currencyToReceive: String
-
-
-    fun init() {
-        timer.start()
+    init {
         fetchExchangeRatesEvery5Seconds()
         fetchHoldings()
     }
 
-    fun calculateExchange(value: Double) {
-        val exchangeRate = holdingsManager.getHoldings()[currencyToReceive]!!
 
-        val exchangedAmount =
-            if (isBaseCurrency()) value * exchangeRate else convertToBaseCurrency(value) * exchangeRate
-        _uiState.value = _uiState.value.copy(exchangedCurrencyValue = exchangedAmount)
+    fun calculateExchange(
+        value: Double,
+        currencyToReceive: String,
+        currencyToSell: String
+    ): ExchangeDetails {
+        val exchangeRate = exchangeRates.rates[currencyToReceive]!!
+        var fee = 0.0
+        if (!freeExchangesAvailable()) {
+            fee = calculateFee(value)
+        }
+        val amountWithFee = value - fee
+
+        val exchangedAmount = when {
+            isCurrencyToSellBaseCurrency(currencyToSell) -> amountWithFee * exchangeRate
+            isCurrencyToReceiveBaseCurrency(currencyToReceive) -> {
+                val rate = exchangeRates.rates[currencyToSell]!!
+                amountWithFee / rate
+            }
+            else -> convertToBaseCurrency(amountWithFee, currencyToSell) * exchangeRate
+        }
+        _uiState.value =
+            _uiState.value.copy(
+                exchangeDetails = exchangedAmount,
+                exchangeResult = null
+            )
+        return ExchangeDetails(
+            Balance(currencyToSell, value),
+            Balance(currencyToReceive, exchangedAmount),
+            fee
+        )
     }
 
-    fun setCurrencyToSell(selectedCurrency: String) {
-        currencyToSell = selectedCurrency
-    }
-
-    fun setCurrencyToReceive(selectedCurrency: String) {
-        currencyToReceive = selectedCurrency
-    }
-
-    fun submitExchange(amount: Double?) {
+    fun submitExchange(amount: Double?, currencyToSell: String, currencyToReceive: String) {
         val currencyToSellBalance = holdingsManager.getHoldings()[currencyToSell]
-        if (currencyToSellBalance != null && amount != null && currencyToSellBalance >= amount) {
-            proceedExchange(amount)
+        if (requirementsToExchangeMet(currencyToSellBalance, amount)) {
+            proceedExchange(amount!!, currencyToSell, currencyToReceive)
+        } else if (amount.isNullOrZero()) {
+            _uiState.value =
+                _uiState.value.copy(exchangeResult = ExchangeResult.BlankAmount)
+        } else {
+            _uiState.value =
+                _uiState.value.copy(exchangeResult = ExchangeResult.InsufficientBalanceError)
         }
     }
 
-    private fun proceedExchange(amount: Double) {
-
-        holdingsManager.saveHolding(
+    private fun proceedExchange(amount: Double, currencyToSell: String, currencyToReceive: String) {
+        val exchangeDetails = calculateExchange(amount, currencyToReceive, currencyToSell)
+        if (freeExchangesAvailable()) {
+            appPreferences.useFreeExchange()
+        }
+        holdingsManager.sellHolding(
             currencyToSell,
-            holdingsManager.getHoldings()[currencyToSell]!! - amount
+            amount
         )
-        holdingsManager.saveHolding(currencyToReceive, _uiState.value.exchangedCurrencyValue)
+        holdingsManager.receiveHolding(
+            exchangeDetails.holdingToReceive.currency,
+            exchangeDetails.holdingToReceive.amount
+        )
+        _uiState.value =
+            _uiState.value.copy(exchangeResult = ExchangeResult.Success(exchangeDetails))
         fetchHoldings()
     }
 
@@ -72,29 +105,62 @@ class HomeScreenViewModel(
         _uiState.value =
             _uiState.value.copy(
                 currenciesHeld = holdings.keys.toList(),
-                holdingsRvItem = holdingsRvMapper.mapToHoldingsRv(holdings)
+                holdingsRvItem = holdingsRvMapper.mapToHoldingsRv(holdings),
+                exchangeResult = null
             )
     }
 
-
     private fun fetchExchangeRatesEvery5Seconds() {
-        //todo surround with try catch and emit error on network/api error
+        timer.start()
         viewModelScope.launch(Dispatchers.IO) {
             timer.flow.collect { seconds ->
                 if (seconds == 0) {
-                    exchangeRates = repository.getExchangeRates()
-                    _uiState.value =
-                        _uiState.value.copy(availableCurrenciesToBuy = exchangeRates.rates.keys.toList())
+                    try {
+                        exchangeRates = repository.getExchangeRates()
+                        if (!firstExchangeRateFetched) {
+                            _uiState.value =
+                                _uiState.value.copy(availableCurrenciesToReceive = exchangeRates.rates.keys.toList())
+                            firstExchangeRateFetched = true
+                        }
+                    } catch (e: Exception) {
+                        _uiState.value =
+                            _uiState.value.copy(exchangeResult = ExchangeResult.UnknownNetworkError)
+                    }
                     timer.setDuration(5)
                 }
             }
         }
     }
 
-    private fun isBaseCurrency() = currencyToSell == exchangeRates.base
+    private fun isCurrencyToSellBaseCurrency(currencyToSell: String) =
+        currencyToSell == exchangeRates.base
+
+    private fun isCurrencyToReceiveBaseCurrency(currencyToReceive: String) =
+        currencyToReceive == exchangeRates.base
+
+    private fun convertToBaseCurrency(value: Double, convertedCurrency: String) =
+        value / exchangeRates.rates[convertedCurrency]!!
+
+    private fun calculateFee(amount: Double) = amount * commissionFee
+
+    private fun freeExchangesAvailable(): Boolean = appPreferences.getFreeExchangesAmount() > 0
 
 
-    private fun convertToBaseCurrency(value: Double) = value / exchangeRates.rates[currencyToSell]!!
+    private fun requirementsToExchangeMet(
+        currencyToSellBalance: Double?,
+        amount: Double?
+    ): Boolean =
+        currencyToSellBalance != null && !amount.isNullOrZero() && isAmountGreaterThanBalance(
+            currencyToSellBalance,
+            amount!!
+        )
 
+    private fun isAmountGreaterThanBalance(
+        currencyToSellBalance: Double,
+        amount: Double
+    ) = currencyToSellBalance >= amount
 
+    companion object {
+        private const val commissionFee = 0.007
+    }
 }

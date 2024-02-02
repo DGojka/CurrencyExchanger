@@ -104,12 +104,12 @@
         app:layout_constraintTop_toTopOf="@id/receive_image" />
 
     <EditText
-        android:id="@+id/sell_amount"
+        android:id="@+id/sell_amount_edit_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:focusedByDefault="true"
         android:gravity="end"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:maxLength="10"
         android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="@id/sell_label"
