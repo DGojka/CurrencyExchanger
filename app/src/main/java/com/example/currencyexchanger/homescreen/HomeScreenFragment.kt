@@ -13,10 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyexchanger.R
 import com.example.currencyexchanger.app.di.AppComponent.Companion.appComponent
 import com.example.currencyexchanger.databinding.FragmentHomeScreenBinding
-import com.example.currencyexchanger.extensions.daggerViewModel
-import com.example.currencyexchanger.extensions.formatTo2Decimals
-import com.example.currencyexchanger.extensions.showShortToast
-import com.example.currencyexchanger.extensions.viewBinding
+import com.example.currencyexchanger.extensions.*
 import com.example.currencyexchanger.homescreen.list.HoldingsAdapter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -62,12 +59,16 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
         updateAvailableCurrencies(state.availableCurrenciesToReceive)
         updateAvailableCurrenciesToSell(state.currenciesHeld)
         binding.submitButton.setOnClickListener {
-            viewModel.submitExchange(binding.sellAmount.text.toString().toDoubleOrNull())
+            viewModel.submitExchange(
+                binding.sellAmountEditText.text.toString().toDoubleOrNull(),
+                currencyToReceive = binding.receiveCurrencySpinner.selectedItem.toString(),
+                currencyToSell = binding.sellCurrencySpinner.selectedItem.toString()
+            )
         }
         when (val result = state.exchangeResult) {
             is ExchangeResult.Success -> {
                 with(result.exchangeDetails) {
-                    requireContext().showShortToast(
+                    requireContext().showLongToast(
                         getString(
                             R.string.exchange_success_toast,
                             holdingToSell.amount.formatTo2Decimals(),
@@ -87,8 +88,12 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
     }
 
     private fun setupSellAmountTextChangeListener() {
-        binding.sellAmount.addTextChangedListener(getOnTextChangeListener {
-            viewModel.notifyExchangeDataChanged(it.toDouble())
+        binding.sellAmountEditText.addTextChangedListener(getOnTextChangeListener {
+            viewModel.calculateExchange(
+                it.toDouble(),
+                currencyToReceive = binding.receiveCurrencySpinner.selectedItem.toString(),
+                binding.sellCurrencySpinner.selectedItem.toString()
+            )
         })
     }
 
@@ -102,20 +107,24 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
         binding.receiveCurrencySpinner.adapter = receiveCurrencyAdapter
         binding.sellCurrencySpinner.onItemSelectedListener =
             getOnItemSelectedListener {
-                viewModel.setCurrencyToSell(it)
-                val currentAmount = binding.sellAmount.text.toString()
+                val currentAmount = binding.sellAmountEditText.text.toString()
                 if (currentAmount.isNotBlank()) {
-                    viewModel.notifyExchangeDataChanged(
-                        binding.sellAmount.text.toString().toDouble()
+                    viewModel.calculateExchange(
+                        currentAmount.toDouble(),
+                        currencyToReceive = binding.receiveCurrencySpinner.selectedItem.toString(),
+                        it
                     )
                 }
             }
         binding.receiveCurrencySpinner.onItemSelectedListener =
             getOnItemSelectedListener {
-                viewModel.setCurrencyToReceive(it)
-                val currentAmount = binding.sellAmount.text.toString()
+                val currentAmount = binding.sellAmountEditText.text.toString()
                 if (currentAmount.isNotBlank()) {
-                    viewModel.notifyExchangeDataChanged(currentAmount.toDouble())
+                    viewModel.calculateExchange(
+                        currentAmount.toDouble(),
+                        currencyToReceive = it,
+                        currencyToSell = binding.sellCurrencySpinner.selectedItem.toString()
+                    )
                 }
             }
     }

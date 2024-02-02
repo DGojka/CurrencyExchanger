@@ -31,26 +31,48 @@ class HomeScreenViewModel(
 
     private lateinit var exchangeRates: ExchangeRates
 
-    private lateinit var currencyToSell: String
-    private lateinit var currencyToReceive: String
-
     init {
         fetchExchangeRatesEvery5Seconds()
         fetchHoldings()
     }
 
-    fun notifyExchangeDataChanged(value: Double) {
+
+    fun calculateExchange(
+        value: Double,
+        currencyToReceive: String,
+        currencyToSell: String
+    ): ExchangeDetails {
+        val exchangeRate = exchangeRates.rates[currencyToReceive]!!
+        var fee = 0.0
+        if (!freeExchangesAvailable()) {
+            fee = calculateFee(value)
+        }
+        val amountWithFee = value - fee
+
+        val exchangedAmount = when {
+            isCurrencyToSellBaseCurrency(currencyToSell) -> amountWithFee * exchangeRate
+            isCurrencyToReceiveBaseCurrency(currencyToReceive) -> {
+                val rate = exchangeRates.rates[currencyToSell]!!
+                amountWithFee / rate
+            }
+            else -> convertToBaseCurrency(amountWithFee, currencyToSell) * exchangeRate
+        }
         _uiState.value =
             _uiState.value.copy(
-                exchangeDetails = calculateExchange(value).holdingToReceive.amount,
+                exchangeDetails = exchangedAmount,
                 exchangeResult = null
             )
+        return ExchangeDetails(
+            Balance(currencyToSell, value),
+            Balance(currencyToReceive, exchangedAmount),
+            fee
+        )
     }
 
-    fun submitExchange(amount: Double?) {
+    fun submitExchange(amount: Double?, currencyToSell: String, currencyToReceive: String) {
         val currencyToSellBalance = holdingsManager.getHoldings()[currencyToSell]
         if (requirementsToExchangeMet(currencyToSellBalance, amount)) {
-            proceedExchange(amount!!)
+            proceedExchange(amount!!, currencyToSell, currencyToReceive)
         } else if (amount.isNullOrZero()) {
             _uiState.value =
                 _uiState.value.copy(exchangeResult = ExchangeResult.BlankAmount)
@@ -60,52 +82,8 @@ class HomeScreenViewModel(
         }
     }
 
-    fun setCurrencyToSell(selectedCurrency: String) {
-        currencyToSell = selectedCurrency
-    }
-
-    fun setCurrencyToReceive(selectedCurrency: String) {
-        if (::currencyToReceive.isInitialized) {
-            val currenciesToSell =
-                holdingsManager.getHoldings().keys.minus(selectedCurrency).toList()
-            _uiState.value = _uiState.value.copy(
-                currenciesHeld = currenciesToSell,
-                exchangeResult = null
-            )
-            if (currencyToSell == selectedCurrency) {
-                currencyToSell = currenciesToSell[0]
-            }
-        }
-
-        currencyToReceive = selectedCurrency
-    }
-
-
-    private fun calculateExchange(value: Double): ExchangeDetails {
-        val exchangeRate = exchangeRates.rates[currencyToReceive]!!
-        var fee = 0.0
-        if (!freeExchangesAvailable()) {
-            fee = calculateFee(value)
-        }
-        val amountWithFee = value - fee
-        val exchangedAmount = when {
-            isCurrencyToSellBaseCurrency() -> amountWithFee * exchangeRate
-            isCurrencyToReceiveBaseCurrency() -> {
-                val rate = exchangeRates.rates[currencyToSell]!!
-                amountWithFee / rate
-            }
-            else -> convertToBaseCurrency(amountWithFee) * exchangeRate
-        }
-
-        return ExchangeDetails(
-            Balance(currencyToSell, value),
-            Balance(currencyToReceive, exchangedAmount),
-            fee
-        )
-    }
-
-    private fun proceedExchange(amount: Double) {
-        val exchangeDetails = calculateExchange(amount)
+    private fun proceedExchange(amount: Double, currencyToSell: String, currencyToReceive: String) {
+        val exchangeDetails = calculateExchange(amount, currencyToReceive, currencyToSell)
         if (freeExchangesAvailable()) {
             appPreferences.useFreeExchange()
         }
@@ -154,11 +132,14 @@ class HomeScreenViewModel(
         }
     }
 
-    private fun isCurrencyToSellBaseCurrency() = currencyToSell == exchangeRates.base
+    private fun isCurrencyToSellBaseCurrency(currencyToSell: String) =
+        currencyToSell == exchangeRates.base
 
-    private fun isCurrencyToReceiveBaseCurrency() = currencyToReceive == exchangeRates.base
+    private fun isCurrencyToReceiveBaseCurrency(currencyToReceive: String) =
+        currencyToReceive == exchangeRates.base
 
-    private fun convertToBaseCurrency(value: Double) = value / exchangeRates.rates[currencyToSell]!!
+    private fun convertToBaseCurrency(value: Double, convertedCurrency: String) =
+        value / exchangeRates.rates[convertedCurrency]!!
 
     private fun calculateFee(amount: Double) = amount * commissionFee
 

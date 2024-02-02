@@ -104,7 +104,7 @@
         app:layout_constraintTop_toTopOf="@id/receive_image" />
 
     <EditText
-        android:id="@+id/sell_amount"
+        android:id="@+id/sell_amount_edit_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:focusedByDefault="true"
