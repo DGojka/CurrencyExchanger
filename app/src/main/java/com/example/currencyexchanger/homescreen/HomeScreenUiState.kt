@@ -13,5 +13,6 @@ data class HomeScreenUiState(
 sealed class ExchangeResult {
     data class Success(val exchangeDetails: ExchangeDetails) : ExchangeResult()
     object InsufficientBalanceError : ExchangeResult()
+    object BlankAmount : ExchangeResult()
     object UnknownNetworkError : ExchangeResult()
 }

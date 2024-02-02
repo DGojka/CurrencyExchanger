@@ -7,7 +7,6 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +15,7 @@ import com.example.currencyexchanger.app.di.AppComponent.Companion.appComponent
 import com.example.currencyexchanger.databinding.FragmentHomeScreenBinding
 import com.example.currencyexchanger.extensions.daggerViewModel
 import com.example.currencyexchanger.extensions.formatTo2Decimals
+import com.example.currencyexchanger.extensions.showShortToast
 import com.example.currencyexchanger.extensions.viewBinding
 import com.example.currencyexchanger.homescreen.list.HoldingsAdapter
 import kotlinx.coroutines.launch
@@ -41,7 +41,6 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.init()
         setupHoldingsRv()
         setupSellAmountTextChangeListener()
         setupCurrencyPickers()
@@ -68,23 +67,21 @@ class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
         when (val result = state.exchangeResult) {
             is ExchangeResult.Success -> {
                 with(result.exchangeDetails) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Sold ${holdingToSell.amount.formatTo2Decimals()} ${holdingToSell.currency} and received ${holdingToReceive.amount.formatTo2Decimals()} ${holdingToReceive.currency}, fee: ${fee.formatTo2Decimals()}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    requireContext().showShortToast(
+                        getString(
+                            R.string.exchange_success_toast,
+                            holdingToSell.amount.formatTo2Decimals(),
+                            holdingToSell.currency,
+                            holdingToReceive.amount.formatTo2Decimals(),
+                            holdingToReceive.currency,
+                            fee.formatTo2Decimals()
+                        )
+                    )
                 }
             }
-            ExchangeResult.InsufficientBalanceError -> Toast.makeText(
-                requireContext(),
-                "Insufficient balance",
-                Toast.LENGTH_SHORT
-            ).show()
-            ExchangeResult.UnknownNetworkError -> Toast.makeText(
-                requireContext(),
-                "Network error",
-                Toast.LENGTH_SHORT
-            ).show()
+            ExchangeResult.InsufficientBalanceError -> requireContext().showShortToast(getString(R.string.insufficient_balance_error_toast))
+            ExchangeResult.UnknownNetworkError -> requireContext().showShortToast(getString(R.string.unknown_network_error_toast))
+            ExchangeResult.BlankAmount -> requireContext().showShortToast(getString(R.string.blank_amount_toast))
             null -> {}
         }
     }

@@ -4,8 +4,9 @@
     <string name="receive">Receive</string>
     <string name="submit">submit</string>
     <string name="my_balances">MY BALANCES</string>
-    <string name="balances_placeholder">BALANCES PLACEHOLDER</string>
     <string name="currency_exchange">CURRENCY EXCHANGE</string>
-    <string name="eur">EUR</string>
-    <string name="usd">USD</string>
+    <string name="exchange_success_toast">Sold %1$s %2$s and received %3$s %4$s, fee: %5$s %2$s</string>
+    <string name="insufficient_balance_error_toast">Insufficient balance</string>
+    <string name="unknown_network_error_toast">Network error</string>
+    <string name="blank_amount_toast">Please enter amount to exchange.</string>
 </resources>

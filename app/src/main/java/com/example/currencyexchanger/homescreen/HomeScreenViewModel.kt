@@ -2,6 +2,7 @@ package com.example.currencyexchanger.homescreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.currencyexchanger.extensions.isNullOrZero
 import com.example.currencyexchanger.homescreen.data.Balance
 import com.example.currencyexchanger.homescreen.data.ExchangeDetails
 import com.example.currencyexchanger.homescreen.list.HoldingsRvMapper
@@ -33,8 +34,7 @@ class HomeScreenViewModel(
     private lateinit var currencyToSell: String
     private lateinit var currencyToReceive: String
 
-
-    fun init() {
+    init {
         fetchExchangeRatesEvery5Seconds()
         fetchHoldings()
     }
@@ -44,6 +44,18 @@ class HomeScreenViewModel(
             _uiState.value.copy(exchangeDetails = calculateExchange(value).holdingToReceive.amount)
     }
 
+    fun submitExchange(amount: Double?) {
+        val currencyToSellBalance = holdingsManager.getHoldings()[currencyToSell]
+        if (requirementsToExchangeMet(currencyToSellBalance, amount)) {
+            proceedExchange(amount!!)
+        } else if (amount.isNullOrZero()) {
+            _uiState.value =
+                _uiState.value.copy(exchangeResult = ExchangeResult.BlankAmount)
+        } else {
+            _uiState.value =
+                _uiState.value.copy(exchangeResult = ExchangeResult.InsufficientBalanceError)
+        }
+    }
 
     fun setCurrencyToSell(selectedCurrency: String) {
         currencyToSell = selectedCurrency
@@ -58,15 +70,6 @@ class HomeScreenViewModel(
         currencyToReceive = selectedCurrency
     }
 
-    fun submitExchange(amount: Double?) {
-        val currencyToSellBalance = holdingsManager.getHoldings()[currencyToSell]
-        if (requirementsToExchangeMet(currencyToSellBalance, amount)) {
-            proceedExchange(amount!!)
-        } else {
-            _uiState.value =
-                _uiState.value.copy(exchangeResult = ExchangeResult.InsufficientBalanceError)
-        }
-    }
 
     private fun calculateExchange(value: Double): ExchangeDetails {
         val exchangeRate = exchangeRates.rates[currencyToReceive]!!
@@ -116,7 +119,6 @@ class HomeScreenViewModel(
             )
     }
 
-
     private fun fetchExchangeRatesEvery5Seconds() {
         timer.start()
         viewModelScope.launch(Dispatchers.IO) {
@@ -153,10 +155,11 @@ class HomeScreenViewModel(
     private fun requirementsToExchangeMet(
         currencyToSellBalance: Double?,
         amount: Double?
-    ): Boolean = currencyToSellBalance != null && amount != null && isAmountGreaterThanBalance(
-        currencyToSellBalance,
-        amount
-    )
+    ): Boolean =
+        currencyToSellBalance != null && !amount.isNullOrZero() && isAmountGreaterThanBalance(
+            currencyToSellBalance,
+            amount!!
+        )
 
     private fun isAmountGreaterThanBalance(
         currencyToSellBalance: Double,
